@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -92,9 +93,14 @@ public class ClienteRestController {
 		try {
 			clienteNew = clienteService.save(cliente);
 		}catch(DataAccessException e) {
-			response.put("mensaje", "Error al realizar el insert en la base de datos");
-			response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
-			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+			List<String> errors = new ArrayList<>();
+			errors.add("El campo 'email' ya existe");
+			//errors.add(e.getMostSpecificCause().getMessage());
+			//response.put("errors", e.getMostSpecificCause().getMessage());
+			response.put("errors", errors);
+			
+
+			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.BAD_REQUEST);
 		}
 		response.put("mensaje","El cliente ha sido creado con exito!");
 		response.put("cliente", clienteNew);
