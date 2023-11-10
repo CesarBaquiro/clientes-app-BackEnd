@@ -28,7 +28,7 @@ INSERT INTO clientes (nombre, apellido, email, create_at) VALUES ('Elena', 'Luna
 INSERT INTO clientes (nombre, apellido, email, create_at) VALUES ('Diego', 'Hernández', 'diego.hernandez@email.com', '2020-06-12');
 INSERT INTO clientes (nombre, apellido, email, create_at) VALUES ('Valentina', 'Mendoza', 'valentina.mendoza@email.com', '2019-04-25');
 INSERT INTO clientes (nombre, apellido, email, create_at) VALUES ('Miguel', 'Silva', 'miguel.silva@email.com', '2018-10-08');
-INSERT INTO clientes (nombre, apellido, email, create_at) VALUES ('Isabella', 'Torres', 'isabella.torres@email.com', '2022-02-17');
+INSERT INTO clientes (nombre, apellido, email, create_at) VALUES ('Isabella', 'Torres', 'isabella.torressss@email.com', '2022-02-17');
 INSERT INTO clientes (nombre, apellido, email, create_at) VALUES ('Gabriel', 'Pérez', 'gabriel.perez@email.com', '2017-11-29');
 INSERT INTO clientes (nombre, apellido, email, create_at) VALUES ('Carmen', 'López', 'carmen.lopez@email.com', '2021-08-03');
 INSERT INTO clientes (nombre, apellido, email, create_at) VALUES ('Francisco', 'Gómez', 'francisco.gomez@email.com', '2016-12-01');

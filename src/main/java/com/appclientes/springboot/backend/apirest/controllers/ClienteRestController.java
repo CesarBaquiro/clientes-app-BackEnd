@@ -43,6 +43,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.appclientes.springboot.backend.apirest.models.entity.Cliente;
 import com.appclientes.springboot.backend.apirest.models.services.IClienteService;
+import com.appclientes.springboot.backend.apirest.models.services.IUploadFileService;
 
 import jakarta.validation.Valid;
 
@@ -54,6 +55,9 @@ public class ClienteRestController {
 	
 	@Autowired
 	private IClienteService clienteService;
+	
+	@Autowired
+	private IUploadFileService uploadService;
 	
 	private final Logger log = LoggerFactory.getLogger(ClienteRestController.class);
 	
@@ -195,14 +199,8 @@ public class ClienteRestController {
 		
 		Cliente cliente = clienteService.findById(id);
 		String nombreFotoAnterior = cliente.getFoto();
-		//Si el cliente que se va a eliminar tiene foto anterior borramos tambien la foto.
-		if(nombreFotoAnterior != null && nombreFotoAnterior.length() > 0) {
-			Path rutaFotoAnterior = Paths.get("uploads").resolve(nombreFotoAnterior).toAbsolutePath();
-			File archivoFotoAnterior = rutaFotoAnterior.toFile();
-			if(archivoFotoAnterior.exists() && archivoFotoAnterior.canRead()) {
-				archivoFotoAnterior.delete();
-			}
-		}
+		
+		uploadService.eliminar(nombreFotoAnterior); 
 		
 		clienteService.delete(id);
 		response.put("mensaje","El cliente ha sido eliminado con exito!");
@@ -219,30 +217,19 @@ public class ClienteRestController {
 		Cliente cliente = clienteService.findById(id);
 		
 		if(!archivo.isEmpty()) {
-			//Le damos un nombre random a la foto separando por _ y despues la original. Ademas eliminamos los espacios en blanco
-			String nombreArchivo = UUID.randomUUID().toString()+ "_" + archivo.getOriginalFilename().replace(" ", "");
 			
-			Path rutaArchivo = Paths.get("uploads").resolve(nombreArchivo).toAbsolutePath();
-			log.info(rutaArchivo.toString());
-			
+			String nombreArchivo = null;
 			try {
-				Files.copy(archivo.getInputStream(), rutaArchivo);
+				nombreArchivo = uploadService.copiar(archivo);
 			} catch (IOException e) {
-				response.put("mensaje", "Error al subir la imagen" + nombreArchivo);
+				response.put("mensaje", "Error al subir la imagen");
 				response.put("error", e.getMessage().concat(": ").concat(e.getCause().getMessage()));
 				e.printStackTrace();
 			}
 			
 			String nombreFotoAnterior = cliente.getFoto();
-			//Comprobomaos si el cliente ya tiene una foto anterior 
-			if(nombreFotoAnterior != null && nombreFotoAnterior.length() > 0) {
-				Path rutaFotoAnterior = Paths.get("uploads").resolve(nombreFotoAnterior).toAbsolutePath();
-				File archivoFotoAnterior = rutaFotoAnterior.toFile();
-				//Si el cliente tiene una foto anterior la borramos
-				if(archivoFotoAnterior.exists() && archivoFotoAnterior.canRead()) {
-					archivoFotoAnterior.delete();
-				}
-			}
+			
+			uploadService.eliminar(nombreFotoAnterior); 
 			
 			cliente.setFoto(nombreArchivo);
 			
@@ -260,25 +247,22 @@ public class ClienteRestController {
 	@GetMapping("/uploads/img/{nombreFoto:.+}")
 	public ResponseEntity<Resource> verFoto(@PathVariable String nombreFoto){
 		
-		Path rutaArchivo = Paths.get("uploads").resolve(nombreFoto).toAbsolutePath();
-		log.info(rutaArchivo.toString());
 		Resource recurso = null;
 		
 		try {
-			recurso = new UrlResource(rutaArchivo.toUri());
-		} catch (MalformedURLException e) {
-			
+			recurso = uploadService.cargar(nombreFoto);
+			log.info("El recurso paso correctamente");
+		} catch (MalformedURLException e) {	
 			e.printStackTrace();
 		}
 		
-		if(!recurso.exists() && !recurso.isReadable()) {
-			throw new RuntimeException("Error no se pudo cardar la imagen: "+nombreFoto);
-		}
+		
 		
 		HttpHeaders cabecera = new HttpHeaders();
 		cabecera.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\""+ recurso.getFilename() + "\"");
 		
 		return new ResponseEntity<Resource>(recurso, cabecera, HttpStatus.OK);
+		
 	}
 }
 
