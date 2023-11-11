@@ -3,11 +3,16 @@ package com.appclientes.springboot.backend.apirest.models.entity;
 import java.io.Serializable;
 import java.util.Date;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 //import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
@@ -44,6 +49,18 @@ public class Cliente implements Serializable{
 	private Date createAt;
 	
 	private String foto;
+	
+	
+	@NotNull(message="La region no puede ser vacia")
+//	Relacionamos a traves del atributo la region
+//	Many to one da la relacion un cliente solo puede tener una region. Una region puede tener muchos clientes
+//	El metodo de carga (fetch) es lazy, osea carga perezosa
+	@ManyToOne(fetch=FetchType.LAZY)
+//	Le damos la llave foranea, esto se puede omitir y spring lo genera
+	@JoinColumn(name="region_id")
+//	Ahora ignoramos unos atributos del JSON para evitar error
+	@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+	private Region region;
 	
 //	@PrePersist
 //	public void prePersist() {
@@ -98,9 +115,18 @@ public class Cliente implements Serializable{
 		this.foto = foto;
 	}
 
-	/**
-	 * 
-	 */
+	
+//	Getters y setters de la region
+	public Region getRegion() {
+		return region;
+	}
+
+	public void setRegion(Region region) {
+		this.region = region;
+	}
+
+
+
 	private static final long serialVersionUID = 1L;
 
 }
