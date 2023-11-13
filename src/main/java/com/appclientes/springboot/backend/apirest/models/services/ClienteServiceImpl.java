@@ -8,7 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.appclientes.springboot.backend.apirest.models.dao.iClienteDao;
+import com.appclientes.springboot.backend.apirest.models.dao.IClienteDao;
 import com.appclientes.springboot.backend.apirest.models.entity.Cliente;
 import com.appclientes.springboot.backend.apirest.models.entity.Region;
 
@@ -16,7 +16,7 @@ import com.appclientes.springboot.backend.apirest.models.entity.Region;
 public class ClienteServiceImpl implements IClienteService{
 
 	@Autowired
-	private iClienteDao clienteDao;
+	private IClienteDao clienteDao;
 	
 	@Override
 	@Transactional(readOnly = true)

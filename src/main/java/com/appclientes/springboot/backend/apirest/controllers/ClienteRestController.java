@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -32,12 +33,18 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.appclientes.springboot.backend.apirest.models.dao.IUsuarioDao;
+import com.appclientes.springboot.backend.apirest.models.dto.CreateUserDTO;
 import com.appclientes.springboot.backend.apirest.models.entity.Cliente;
+import com.appclientes.springboot.backend.apirest.models.entity.ERole;
 import com.appclientes.springboot.backend.apirest.models.entity.Region;
+import com.appclientes.springboot.backend.apirest.models.entity.Role;
+import com.appclientes.springboot.backend.apirest.models.entity.Usuario;
 import com.appclientes.springboot.backend.apirest.models.services.IClienteService;
 import com.appclientes.springboot.backend.apirest.models.services.IUploadFileService;
 
 import jakarta.validation.Valid;
+import lombok.Delegate;
 
 
 @CrossOrigin(origins = {"http://localhost:4200"})
@@ -50,6 +57,9 @@ public class ClienteRestController {
 	
 	@Autowired
 	private IUploadFileService uploadService;
+	
+	@Autowired
+	private IUsuarioDao iUsuarioDao;
 	
 	private final Logger log = LoggerFactory.getLogger(ClienteRestController.class);
 	
@@ -262,5 +272,43 @@ public class ClienteRestController {
 	public List<Region> listarRegiones(){
 		return clienteService.findAllRegiones();
 	}
+	
+	@GetMapping("/hello")
+	public String helloNotSecured(){
+		return "Hello world not secured";
+	};
+	
+	@GetMapping("/helloSecured")
+	public String helloSecured(){
+		return "Hello world secured";
+	};
+	
+	@PostMapping("/createUser")
+	public ResponseEntity<?> createUser(@Valid @RequestBody CreateUserDTO createUserDTO){
+		
+		Set<Role> roles = createUserDTO.getRoles().stream()
+				.map(role -> Role.builder()
+						.name(ERole.valueOf(role))
+						.build())
+				.collect(Collectors.toSet());
+				
+		Usuario usuario = Usuario.builder()
+				.username(createUserDTO.getUsername())
+				.password(createUserDTO.getPassword())
+				.email(createUserDTO.getEmail())
+				.roles(roles)
+				.build();
+		
+		iUsuarioDao.save(usuario);
+		
+		return ResponseEntity.ok(usuario);
+	}
+	
+	@DeleteMapping("/deleteUser")
+	public String deleteUser(@RequestParam String id) {
+		iUsuarioDao.deleteById(Long.parseLong(id));
+		return "Se ha borrado el usuario con id".concat(id);
+	}
+	
 }
 
